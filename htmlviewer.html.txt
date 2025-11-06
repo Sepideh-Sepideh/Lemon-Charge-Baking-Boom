@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8" />
+  <title>School Chemistry Simulator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      text-align: center;
+      transition: background 0.5s;
+    }
+    .page {
+      display: none;
+      padding: 40px 20px;
+    }
+    .active {
+      display: block;
+    }
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 16px;
+      background-color: #ccc;
+    }
+
+    #home {
+      background: linear-gradient(to bottom right, #d0f0ff, #f0fff0);
+    }
+    #home button {
+      background-color: #ffcc00;
+    }
+
+    #battery {
+      background-color: #fffacd;
+    }
+    .battery-box {
+      margin-top: 40px;
+      position: relative;
+      width: 300px;
+      height: 300px;
+      margin: auto;
+    }
+    .lemon {
+      width: 120px;
+      height: 120px;
+      background-color: #fff44f;
+      border-radius: 50%;
+      position: absolute;
+      top: 90px;
+      left: 90px;
+      box-shadow: inset -5px -5px 10px #ccc;
+    }
+    .copper, .zinc {
+      width: 20px;
+      height: 40px;
+      position: absolute;
+      top: 100px;
+    }
+    .copper {
+      left: 60px;
+      background-color: #b87333;
+    }
+    .zinc {
+      right: 60px;
+      background-color: #cccccc;
+    }
+    .wire {
+      width: 2px;
+      height: 100px;
+      background-color: #444;
+      position: absolute;
+      top: 40px;
+      display: none;
+    }
+    .wire.left {
+      left: 70px;
+    }
+    .wire.right {
+      right: 70px;
+    }
+    .lamp {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #333;
+      position: absolute;
+      top: 0;
+      left: 130px;
+      box-shadow: 0 0 10px #000;
+      transition: all 0.3s ease;
+    }
+    .lamp.on {
+      background-color: #ffff66;
+      box-shadow: 0 0 30px #ff0;
+    }
+
+    #volcano {
+      background-color: #ffe5e5;
+    }
+    .volcano-box {
+      margin-top: 40px;
+    }
+    .volcano {
+      width: 140px;
+      height: 140px;
+      background: #8b4513;
+      margin: 20px auto;
+      clip-path: polygon(50% 0%, 90% 100%, 10% 100%);
+      position: relative;
+      border: 3px solid #5c3317;
+      box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);
+      overflow: visible;
+    }
+    .eruption {
+      width: 30px;
+      height: 0;
+      background: radial-gradient(circle, #ff4500, #ff6347);
+      position: absolute;
+      top: -60px;
+      left: 55px;
+      border-radius: 50%;
+      animation: erupt 1s ease-out forwards;
+    }
+    @keyframes erupt {
+      0% { height: 0; opacity: 0; }
+      100% { height: 60px; opacity: 1; }
+    }
+    .reaction {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .magma-drop {
+      width: 12px;
+      height: 12px;
+      background: red;
+      border-radius: 50%;
+      position: absolute;
+      top: 100px;
+      animation: fall 2s linear forwards;
+    }
+    @keyframes fall {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-200px) scale(0.5); }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="home" class="page active">
+    <h1>Welcome</h1>
+    <p>Choose one of the experiments below:</p>
+    <button onclick="showPage('battery')">🍋 Lemon Battery</button>
+    <button onclick="showPage('volcano')">🌋 Baking Soda Volcano</button>
+  </div>
+
+  <div id="battery" class="page">
+    <button class="back-btn" onclick="showPage('home')">← Back</button>
+    <h1>🍋 Lemon Battery Experiment</h1>
+    <div class="battery-box">
+      <div class="lamp" id="lamp"></div>
+      <div class="wire left" id="wireLeft"></div>
+      <div class="wire right" id="wireRight"></div>
+      <div class="copper"></div>
+      <div class="zinc"></div>
+      <div class="lemon"></div>
+    </div>
+    <button onclick="turnOn()">Turn On</button>
+    <button onclick="turnOff()">Turn Off</button>
+  </div>
+
+  <div id="volcano" class="page">
+    <button class="back-btn" onclick="showPage('home')">← Back</button>
+    <h1>🌋 Baking Soda Volcano</h1>
+    <div class="volcano-box">
+      🧴 Vinegar + 🧂 Baking Soda
+      <div class="volcano">
+        <div class="eruption" id="eruption" style="display:none;"></div>
+        <div id="drops"></div>
+      </div>
+      <button onclick="startVolcano()">Start Reaction</button>
+      <div class="reaction" id="reaction"></div>
+    </div>
+  </div>
+
+  <script>
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function turnOn() {
+      document.getElementById("lamp").classList.add("on");
+      document.getElementById("wireLeft").style.display = "block";
+      document.getElementById("wireRight").style.display = "block";
+    }
+
+    function turnOff() {
+      document.getElementById("lamp").classList.remove("on");
+      document.getElementById("wireLeft").style.display = "none";
+      document.getElementById("wireRight").style.display = "none";
+    }
+
+    function startVolcano() {
+      const eruption = document.getElementById("eruption");
+      eruption.style.display = "block";
+      eruption.style.animation = "none";
+      void eruption.offsetWidth;
+      eruption.style.animation = "erupt 1s ease-out forwards";
+
+      const dropsContainer = document.getElementById("drops");
+      dropsContainer.innerHTML = "";
+      for (let i = 0; i < 6; i++) {
+        const drop = document.createElement("div");
+        drop.className = "magma-drop";
+        drop.style.left = `${65 + (Math.random() * 40 - 20)}px`;
+        drop.style.animationDelay = `${i * 0.3}s`;
+        dropsContainer.appendChild(drop);
+      }
+
+      document.getElementById("reaction").textContent =
+        "NaHCO₃ + CH₃COOH → CO₂ + H₂O + CH₃COONa";
+    }
+  </script>
+</body>
+</html>
